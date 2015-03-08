@@ -23,6 +23,7 @@ build/Release
 obj
 
 *.dat
+*.tmp
 
 # Dependency directory
 # Commenting this out is preferred by some people, see
