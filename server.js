@@ -4,6 +4,8 @@ var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
 
 var testController = require('./controllers/test.js');
+var authController = require('./controllers/auth.js');
+var userController = require('./controllers/user.js');
 
 // Connect to the beerlocker MongoDB
 mongoose.connect('mongodb://localhost:27017/pma_appdata');
@@ -29,7 +31,14 @@ var router = express.Router();
 
 // Create endpoint handlers for /beers
 router.route('/test')
-  .get(testController.getTest);
+  .get(authController.neverauth, testController.getTest);
+
+router.route('/user/fbregister')
+  .post(userController.registerWithFb);
+
+router.route('/user')
+  .get(userController.getUsers)
+  .delete(userController.deleteAll);
 
 
 // Register all our routes with /api
@@ -39,7 +48,7 @@ app.use(function (err, req, res, next) {
     
     console.error(err.stack);
     
-    res.status(500).send(err);
+    res.status(500).send(err.message);
 
 });
 
