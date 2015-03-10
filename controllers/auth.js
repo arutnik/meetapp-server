@@ -2,9 +2,9 @@
 
 var myauth = function (req, res, next) {
     
-    var error = new Error("nobody can use this");
+    //var error = new Error("nobody can use this");
 
-    next(error);
+    next();
 };
 
-module.exports.neverauth = myauth;
+module.exports.isAuthenticated = myauth;

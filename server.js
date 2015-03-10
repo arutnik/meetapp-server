@@ -3,9 +3,12 @@ var express = require('express');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
 
-var testController = require('./controllers/test.js');
-var authController = require('./controllers/auth.js');
-var userController = require('./controllers/user.js');
+//Setup
+var routing = require('./routing.js');
+
+//Middleware
+var formatResponse = require('./middleware/formatResponse.js');
+var errorHandler = require('./middleware/globalErrorHandler.js');
 
 // Connect to the beerlocker MongoDB
 mongoose.connect('mongodb://localhost:27017/pma_appdata');
@@ -21,50 +24,22 @@ app.use(bodyParser.urlencoded({
 // Use the passport package in our application
 //app.use(passport.initialize());
 
-app.use(function (req, res, next) {
-    console.log('%s %s', req.method, req.url);
-    next();
-});
+//app.use(function (req, res, next) {
+//    console.log('%s %s', req.method, req.url);
+//    next();
+//});
+
 
 // Create our Express router
 var router = express.Router();
+routing.configureRoutes(app, router);
 
-// Create endpoint handlers for /beers
-router.route('/test')
-  .get(authController.neverauth, testController.getTest);
+//Add global post middleware
+app.use(errorHandler.globalErrorHandler);
 
-router.route('/user/fbregister')
-  .post(userController.registerWithFb);
+app.use(formatResponse.formatResponse);
 
-router.route('/user')
-  .get(userController.getUsers)
-  .delete(userController.deleteAll);
-
-
-// Register all our routes with /api
-app.use('/api', router);
-
-app.use(function (err, req, res, next) {
-    
-    console.error(err.stack);
-    
-    res.status(500).send(err.message);
-
-});
-
-//callback for json wrapping - just an example
-app.use(function (req, res, next) {
-    
-    if (req.result) {
-        console.log('%s', req.result);
-        res.json(req.result);
-    }
-    
-    
-    return next();
-});
-
-
+//Run app
 var port = 3000;
 
 console.log("Listening on port %s", port);

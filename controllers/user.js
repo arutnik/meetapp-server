@@ -1,13 +1,17 @@
 ﻿// Load required packages
 var User = require('../models/user');
+var errorHandler = require('../errorHandler');
 var guids = require('node-uuid');
 var https = require('https');
 var util = require('util');
+var async = require('async');
 
 // Create endpoint /api/users for POST
 exports.registerWithFb = function (req, res, next) {
     
-    //Check if existing user
+    if (!("fbId" in req.body) || !("fbAccessToken" in req.body)) {
+        return next(errorHandler.setUpErrorResponse(req, 400, "Missing data in request body", null));
+    }
 
     var user = new User({
         pmaUserId: guids.v4()
@@ -34,9 +38,7 @@ exports.registerWithFb = function (req, res, next) {
            
 
             if (user.socialNetworkLinks.fbId != fbResponse.id) {
-                var wrongIdError = new Error("That token goes with a different user id.");
-
-                return next(wrongIdError);
+                return next(errorHandler.setUpErrorResponse(req, 400, "Access token was not valid for supplied user id.", null));
             }
             
             //Look for existing user with same fbid first.
