@@ -1,4 +1,7 @@
-﻿// Load required packages
+﻿//Schema for the core user, this is for storing authentication
+//and other sensitive information
+
+// Load required packages
 var mongoose = require('mongoose');
 var bcrypt = require('bcrypt-nodejs');
 
@@ -13,8 +16,8 @@ var UserSchema = new mongoose.Schema({
         required: true
     },
     socialNetworkLinks: {
-        hasLinkedFb : [Boolean],
-        fbId : [String]
+        hasLinkedFb : { type: Boolean, required: false },
+        fbId : { type: String, required: false }
     }
 });
 
