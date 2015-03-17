@@ -18,11 +18,15 @@
   <ItemGroup>
     <Content Include="package.json" />
     <Compile Include="controllers\auth.js" />
+    <Compile Include="controllers\meet.js" />
     <Compile Include="controllers\user.js" />
     <Compile Include="errorHandler.js" />
     <Compile Include="middleware\formatResponse.js" />
     <Compile Include="middleware\globalErrorHandler.js" />
+    <Compile Include="models\meetHub.js" />
     <Compile Include="models\user.js" />
+    <Compile Include="models\meet.js" />
+    <Compile Include="models\userProfile.js" />
     <Compile Include="routing.js" />
     <Compile Include="server.js" />
   </ItemGroup>

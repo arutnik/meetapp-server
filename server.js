@@ -20,6 +20,7 @@ var app = express();
 app.use(bodyParser.urlencoded({
     extended: true
 }));
+app.use(bodyParser.json());
 
 // Use the passport package in our application
 //app.use(passport.initialize());

@@ -2,10 +2,11 @@
 
 // Load required packages
 var mongoose = require('mongoose');
+require('mongoose-double')(mongoose);
 
 // Define our user schema
 var UserProfileSchema = new mongoose.Schema({
-    _user : { type: ObjectId, ref: 'User' },
+    _user : { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     realName : {
         firstName : { type: String, required: true },
         lastName : { type: String, required: true },
@@ -20,13 +21,13 @@ var UserProfileSchema = new mongoose.Schema({
             type: { type: String, required: true }
         }],
     homeLocation : {
-        lat: { type: Double, required: true },
-        long: { type: Double, required: true }
+        lat: { type: mongoose.Schema.Types.Double, required: true },
+        long: { type: mongoose.Schema.Types.Double, required: true }
     },
     interests : [String],
     meets : [
         {
-            _meet: { type: Objectid, ref: 'Meet' },
+            _meet: { type: mongoose.Schema.Types.ObjectId, ref: 'Meet' },
             userStatus : { type: String, required: true }
         }
     ]

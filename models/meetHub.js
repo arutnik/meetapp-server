@@ -5,12 +5,9 @@ var mongoose = require('mongoose');
 
 var MeetHubSchema = new mongoose.Schema({
     
-    attendees : [
-        {
-            _userProfile: { type: Objectid, ref: 'UserProfile' },
-            userStatus : { type: String, required: true }
-        }
-    ],
+
+    description : { type: String, required: true },
+    
     conversationPosts : [
         {
             id : { type: String, required: true },
@@ -30,4 +27,4 @@ var MeetHubSchema = new mongoose.Schema({
 });
 
 // Export the Mongoose model
-module.exports = mongoose.model('MeetHub', MeetSchema);
+module.exports = mongoose.model('MeetHub', MeetHubSchema);
