@@ -21,6 +21,7 @@
     <Compile Include="controllers\meet.js" />
     <Compile Include="controllers\user.js" />
     <Compile Include="errorHandler.js" />
+    <Compile Include="middleware\addUserProfile.js" />
     <Compile Include="middleware\formatResponse.js" />
     <Compile Include="middleware\globalErrorHandler.js" />
     <Compile Include="models\meetHub.js" />

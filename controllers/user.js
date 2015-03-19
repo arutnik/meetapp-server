@@ -1,10 +1,56 @@
 ﻿// Load required packages
 var User = require('../models/user');
+var UserProfile = require('../models/userProfile')
 var errorHandler = require('../errorHandler');
 var guids = require('node-uuid');
 var https = require('https');
 var util = require('util');
 var async = require('async');
+
+exports.registerDebug = function (req, res, next) {
+    var user = new User({
+        pmaUserId: req.body.userId,
+        password: req.body.password 
+    });
+
+    user.socialNetworkLinks = {
+        hasLinkedFb : false,
+        fbId : "",
+    };
+
+    user.save(function (err, newUser) {
+        if (err) {
+            errorHandler.setUpErrorResponse(req, 500, 'Error saving user.', err);
+            return next(err);
+        }
+
+        var userProfile = new UserProfile({
+            _user: newUser._id,
+            realName : { firstName: 'debug', lastName: 'jones' },
+            dob: Date.now(),
+            displayName: 'coolguy',
+            bio: '..',
+            gender: 'm',
+            pictures: [],
+            homeLocation: { lat: 10, long: 10 },
+            interests: [],
+            meets : [],
+        });
+
+        userProfile.save(function (perr, newProfile) { 
+            if (perr) {
+                errorHandler.setUpErrorResponse(req, 500, 'Error saving user.', perr);
+                return next(perr);
+            }
+
+            req.result = {};
+            req.result.user = newUser;
+            req.result.profile = newProfile;
+
+            return next();
+        });
+    });
+}
 
 exports.registerWithFb = function (req, res, next) {
     

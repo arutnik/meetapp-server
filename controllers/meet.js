@@ -6,6 +6,7 @@ exports.createMeet = function (req, res, next) {
 
     var newMeet = new Meet({
         title: req.body.title,
+        _meetHost: req.userProfile._id,
         status: 'active',
         startTimeUtc: Date.now(),
         lengthMinutes: 1,

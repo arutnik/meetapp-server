@@ -2,6 +2,7 @@
 var express = require('express');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
+var passport = require('passport');
 
 //Setup
 var routing = require('./routing.js');
@@ -23,7 +24,7 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json());
 
 // Use the passport package in our application
-//app.use(passport.initialize());
+app.use(passport.initialize());
 
 //app.use(function (req, res, next) {
 //    console.log('%s %s', req.method, req.url);
