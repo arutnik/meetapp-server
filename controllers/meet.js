@@ -2,6 +2,27 @@
 var errorHandler = require('../errorHandler');
 var async = require('async');
 
+// Create endpoint /api/meets/:meet_id/join for POST
+exports.joinMeet = function (req, res, next) {
+    
+    Meet.joinMeetIfRoom(req.params.meet_id, req.userProfile._id, function (err, didJoin) {
+    
+        if (err) {
+            errorHandler.setUpErrorResponse(req, 400, "Error joining join meet.", err);
+            return next(err);
+        }
+        
+        if (!didJoin) {
+            return next(errorHandler.setUpErrorResponse(req, 410, "Was not allowed to join the meet", null));
+        }
+
+        req.result = { joined: true };
+
+        return next();
+    });
+
+}
+
 exports.createMeet = function (req, res, next) {
 
     var newMeet = new Meet({
@@ -15,7 +36,7 @@ exports.createMeet = function (req, res, next) {
         interests: [],
         attendees: [],
         bannedAttendees: [],
-        attendeeCount : 0,
+        attendeeSpace : 4,
         attendeeStatus : {},
         maxCapacity : 4,
         attendeeCriteria : {

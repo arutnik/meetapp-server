@@ -26,7 +26,7 @@ var MeetSchema = new mongoose.Schema({
     interests : [String],
     attendees : [mongoose.Schema.Types.ObjectId],//Just user user ids
     bannedAttendees : [mongoose.Schema.Types.ObjectId],
-    attendeeCount : { type: Number, required: true },
+    attendeeSpace : { type: Number, required: true },
     attendeeStatus : { type: mongoose.Schema.Types.Mixed, required: true  },
     maxCapacity : { type: Number, required: true },
     attendeeCriteria : {
@@ -37,12 +37,28 @@ var MeetSchema = new mongoose.Schema({
     userCreationId : { type: String, required: true }
 });
 
+MeetSchema.statics.joinMeetIfRoom = function joinMeet(meetId, userId, cb) {
+    
+    var meetObjectId = mongoose.Types.ObjectId(meetId);
+    
+    var attendeeStatusPropertyName = 'attendeeStatus.' + userId;
+    
+    var setOperator = {};
+    setOperator[attendeeStatusPropertyName] = 'att';
+
+    this.update({ _id : meetObjectId, attendeeSpace : { $gt: 0 }, 'attendees' : { $ne: userId }, 'bannedAttendees' : { $ne: userId }, }
+    , { $push: { attendees: userId }, $inc: { attendeeSpace: -1 }, $set: setOperator }
+    , function (err, model) {
+        
+        var result = false;
+        if (model) {
+            result = true;
+        }
+
+        return cb(err, result);
+    });
+};
+
 // Export the Mongoose model
 module.exports = mongoose.model('Meet', MeetSchema);
-
-var func = function (meetId, cb) {
-    var db = module.exports;
-
-    //db.update({ Id : meetId, $where: "this.attendeeCount <= attendees.length"}, 
-};
 
