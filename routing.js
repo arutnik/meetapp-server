@@ -26,6 +26,15 @@ var configureRoutes = function (app, router) {
     router.route('/meets/:meet_id/join')
         .post(authController.isAuthenticated, addUserProfileMiddleware, meetController.joinMeet);
     
+    router.route('/meets/:meet_id/leave')
+        .post(authController.isAuthenticated, addUserProfileMiddleware, meetController.leaveMeet);
+    
+    router.route('/meets/:meet_id/ban')
+        .post(authController.isAuthenticated, addUserProfileMiddleware, meetController.banAttendee);
+    
+    router.route('/meets/:meet_id/unban')
+        .post(authController.isAuthenticated, addUserProfileMiddleware, meetController.unBanAttendee);
+    
     // Register all our routes with /api
     app.use('/api', router);
 

@@ -40,14 +40,15 @@ var MeetSchema = new mongoose.Schema({
 MeetSchema.statics.joinMeetIfRoom = function joinMeet(meetId, userId, cb) {
     
     var meetObjectId = mongoose.Types.ObjectId(meetId);
+    var userObjectId = mongoose.Types.ObjectId(userId);
     
     var attendeeStatusPropertyName = 'attendeeStatus.' + userId;
     
     var setOperator = {};
     setOperator[attendeeStatusPropertyName] = 'att';
 
-    this.update({ _id : meetObjectId, attendeeSpace : { $gt: 0 }, 'attendees' : { $ne: userId }, 'bannedAttendees' : { $ne: userId }, }
-    , { $push: { attendees: userId }, $inc: { attendeeSpace: -1 }, $set: setOperator }
+    this.update({ _id : meetObjectId, attendeeSpace : { $gt: 0 }, 'attendees' : { $ne: userObjectId }, 'bannedAttendees' : { $ne: userObjectId }, }
+    , { $push: { attendees: userObjectId }, $inc: { attendeeSpace: -1 }, $set: setOperator }
     , function (err, model) {
         
         var result = false;
@@ -56,6 +57,80 @@ MeetSchema.statics.joinMeetIfRoom = function joinMeet(meetId, userId, cb) {
         }
 
         return cb(err, result);
+    });
+};
+
+MeetSchema.statics.leaveMeet = function leaveMeet(meetId, userId, cb) {
+
+    var meetObjectId = mongoose.Types.ObjectId(meetId);
+    var userObjectId = mongoose.Types.ObjectId(userId);
+
+    var attendeeStatusPropertyName = 'attendeeStatus.' + userId;
+
+    var setOperator = {};
+    setOperator[attendeeStatusPropertyName] = 'left';
+
+    this.update({ _id : meetObjectId, 'attendees' : { $eq: userObjectId } }
+    , { $pull : { attendees : userObjectId }, $set: setOperator, $inc : { attendeeSpace: 1 } }
+    , function (err, model) {
+
+        var result = false;
+        if (model) {
+            result = true;
+        }
+        
+        return cb(err, result);
+
+    });
+
+};
+
+MeetSchema.statics.banAttendee = function banAttendee(meetId, bannedUserId, cb) {
+
+    var meetObjectId = mongoose.Types.ObjectId(meetId);
+    var userObjectId = mongoose.Types.ObjectId(bannedUserId);
+
+    var attendeeStatusPropertyName = 'attendeeStatus.' + bannedUserId;
+    
+    var setOperator = {};
+    setOperator[attendeeStatusPropertyName] = 'banned';
+
+    this.update({ _id : meetObjectId, 'attendees' : { $eq: userObjectId } }
+    , { $pull : { attendees : userObjectId }, $push: { bannedAttendees: userObjectId }, $set: setOperator, $inc : { attendeeSpace: 1 } }
+    , function (err, model) {
+        
+        var result = false;
+        if (model) {
+            result = true;
+        }
+        
+        return cb(err, result);
+
+    });
+};
+
+//Unbans, but does not add them back to attending
+MeetSchema.statics.unBanAttendee = function banAttendee(meetId, bannedUserId, cb) {
+    
+    var meetObjectId = mongoose.Types.ObjectId(meetId);
+    var userObjectId = mongoose.Types.ObjectId(bannedUserId);
+    
+    var attendeeStatusPropertyName = 'attendeeStatus.' + bannedUserId;
+    
+    var setOperator = {};
+    setOperator[attendeeStatusPropertyName] = 'unbanned';
+    
+    this.update({ _id : meetObjectId, 'bannedAttendees' : { $eq: userObjectId } }
+    , { $pull : { bannedAttendees : userObjectId }, $set: setOperator, }
+    , function (err, model) {
+        
+        var result = false;
+        if (model) {
+            result = true;
+        }
+        
+        return cb(err, result);
+
     });
 };
 
