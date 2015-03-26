@@ -18,6 +18,7 @@
     "mongoose-double": "0.0.1",
     "node-uuid": "^1.4.3",
     "passport": "^0.2.1",
-    "passport-http": "^0.2.2"
+    "passport-http": "^0.2.2",
+    "underscore": "^1.8.2"
   }
 }

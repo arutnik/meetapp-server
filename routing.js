@@ -23,6 +23,9 @@ var configureRoutes = function (app, router) {
     router.route('/meets/create')
         .post(authController.isAuthenticated, addUserProfileMiddleware, meetController.createMeet);
     
+    router.route('/meets/:meet_id')
+        .get(authController.isAuthenticated, meetController.getMeet);
+    
     router.route('/meets/:meet_id/join')
         .post(authController.isAuthenticated, addUserProfileMiddleware, meetController.joinMeet);
     

@@ -47,20 +47,20 @@ UserProfileSchema.methods.stripDataForViewCurrentUser = function () {
 //Show what the local user should see when viewing other 'light' profile
 UserProfileSchema.methods.stripDataForViewOtherUserLight = function () {
     this._user = undefined;
-    this._realName = undefined;
-    this._dob = undefined;
-    this._homeLocation = undefined;
-    this._interests = undefined;
-    this._bio = undefined;
-    this._meets = undefined;
+    this.realName = undefined;
+    this.dob = undefined;
+    this.homeLocation = undefined;
+    this.interests = undefined;
+    this.bio = undefined;
+    this.meets = undefined;
 };
 
 //Show what the local user should see when viewing other 'detail' profile
 UserProfileSchema.methods.stripDataForViewOtherUserDetailed = function () {
     this._user = undefined;
-    this._realName = undefined;
-    this._dob = undefined;
-    this._homeLocation = undefined;
+    this.realName = undefined;
+    this.dob = undefined;
+    this.homeLocation = undefined;
 };
 
 // Export the Mongoose model

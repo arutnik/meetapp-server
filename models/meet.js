@@ -24,8 +24,8 @@ var MeetSchema = new mongoose.Schema({
         long: { type: mongoose.Schema.Types.Double, required: true }
     },
     interests : [String],
-    attendees : [mongoose.Schema.Types.ObjectId],//Just user user ids
-    bannedAttendees : [mongoose.Schema.Types.ObjectId],
+    attendees : [{ type: mongoose.Schema.Types.ObjectId, ref: 'UserProfile' }],//Just user user ids
+    bannedAttendees : [{ type: mongoose.Schema.Types.ObjectId, ref: 'UserProfile' }],
     attendeeSpace : { type: Number, required: true },
     attendeeStatus : { type: mongoose.Schema.Types.Mixed, required: true  },
     maxCapacity : { type: Number, required: true },
@@ -37,6 +37,10 @@ var MeetSchema = new mongoose.Schema({
     userCreationId : { type: String, required: true }
 });
 
+MeetSchema.methods.stripDataForReturn = function () {
+    
+};
+
 MeetSchema.statics.joinMeetIfRoom = function joinMeet(meetId, userId, cb) {
     
     var meetObjectId = mongoose.Types.ObjectId(meetId);
@@ -47,7 +51,7 @@ MeetSchema.statics.joinMeetIfRoom = function joinMeet(meetId, userId, cb) {
     var setOperator = {};
     setOperator[attendeeStatusPropertyName] = 'att';
 
-    this.update({ _id : meetObjectId, attendeeSpace : { $gt: 0 }, 'attendees' : { $ne: userObjectId }, 'bannedAttendees' : { $ne: userObjectId }, }
+    this.update({ _id : meetObjectId, attendeeSpace : { $gt: 0 }, _meetHost : { $ne: userObjectId }, 'attendees' : { $ne: userObjectId }, 'bannedAttendees' : { $ne: userObjectId }, }
     , { $push: { attendees: userObjectId }, $inc: { attendeeSpace: -1 }, $set: setOperator }
     , function (err, model) {
         

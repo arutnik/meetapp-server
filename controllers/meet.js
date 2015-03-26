@@ -1,6 +1,50 @@
 ﻿var Meet = require('../models/meet.js');
+var UserProfile = require('../models/userProfile.js');
 var errorHandler = require('../errorHandler');
 var async = require('async');
+var _ = require('underscore');
+
+// Create endpoint /api/meets/:meet_id for GET
+exports.getMeet = function (req, res, next) {
+    Meet.findOne({ _id: req.params.meet_id })
+    .populate('_meetHost')
+    .populate('attendees')
+    .populate('bannedAttendees')
+    .exec(function (err, model) {
+        
+        if (err) {
+            errorHandler.setUpErrorResponse(req, 400, "Error joining meet.", err);
+            return next(err);
+        }
+        
+        if (!model) {
+            return next(errorHandler.setUpErrorResponse(req, 404, 'Meet not found', null));
+        }
+        
+        //Post process user data
+        
+        if (model._meetHost instanceof UserProfile) {
+            //Don't care if viewing your own, no need to send your own full profile
+            model._meetHost.stripDataForViewOtherUserLight();
+        }
+        
+        _.forEach(model.attendees, function (e, i, list) {
+            if (e instanceof UserProfile) {
+                e.stripDataForViewOtherUserLight();
+            }
+        });
+        
+        _.forEach(model.bannedAttendees, function (e, i, list) {
+            if (e instanceof UserProfile) {
+                e.stripDataForViewOtherUserLight();
+            }
+        });
+
+        req.result = model;
+
+        return next();
+    });
+}
 
 // Create endpoint /api/meets/:meet_id/join for POST
 exports.joinMeet = function (req, res, next) {
