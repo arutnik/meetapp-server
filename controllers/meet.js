@@ -1,8 +1,10 @@
 ﻿var Meet = require('../models/meet.js');
+var MeetHub = require('../models/meetHub.js');
 var UserProfile = require('../models/userProfile.js');
 var errorHandler = require('../errorHandler');
 var async = require('async');
 var _ = require('underscore');
+var moment = require('moment');
 
 // Create endpoint /api/meets/:meet_id for GET
 exports.getMeet = function (req, res, next) {
@@ -210,27 +212,50 @@ exports.unBanAttendee = function (req, res, next) {
 }
 
 exports.createMeet = function (req, res, next) {
+    
+    //Todo: many input validations...
+    
+    var startTimeUtc = moment(req.body.startTimeUtc);
+    
 
     var newMeet = new Meet({
         title: req.body.title,
-        _meetHost: req.userProfile._id,
-        status: 'active',
-        startTimeUtc: Date.now(),
-        lengthMinutes: 1,
+        startTimeUtc: startTimeUtc,
+        lengthMinutes: req.body.lengthMinutes,
         pictures: [],
-        location: { lat: 1.0, long: 1.0 },
-        interests: [],
+        location: {
+            lat: req.body.location.lat,
+            long: req.body.location.long,
+        },
+        interests: req.body.interests,
+        attendeeSpace : req.body.maxCapacity,
+        maxCapacity : req.body.maxCapacity,
+        attendeeCriteria : {
+            genders: req.body.attendeeCriteria.genders,
+            minAge : req.body.attendeeCriteria.minAge,
+            maxAge : req.body.attendeeCriteria.maxAge,
+        },
         attendees: [],
         bannedAttendees: [],
-        attendeeSpace : 4,
         attendeeStatus : {},
-        maxCapacity : 4,
-        attendeeCriteria : {
-            genders: [],
-            minAge : 50,
-            maxAge : 30,
-        },
-        userCreationId : req.body.userCreationId
+        status: 'active',
+        _meetHost: req.userProfile._id,
+        userCreationId : req.body.userCreationId,
+        creationTime: Date.now(),
+    });
+    
+    _.forEach(req.body.pictures, function (e, i, list) {
+        var pic = {
+            uri: e,
+            metadata: { source: 'host'}
+        };
+        newMeet.pictures.push(pic);
+    });
+    
+    var newMeetHub = new MeetHub({
+        description: req.body.description,
+        creationTime: newMeet.creationTime,
+        parentMeetInitialScheduledTime: newMeet.startTimeUtc,
     });
     
     var createReturnResultFromMeet = function (someMeet){
@@ -240,6 +265,7 @@ exports.createMeet = function (req, res, next) {
     }
     
     var existingMeet = null;
+    var savedMeetHub = null;
     
     var breakAsync = { breakOut: true };
     var result = {};
@@ -260,9 +286,9 @@ exports.createMeet = function (req, res, next) {
         //React to existing
         function (callback){
             if (existingMeet) {
-                //if (existingMeet._meetHost != req.auth.UserProfile._id) {
-                //    return callback(errorHandler.setUpErrorResponse(req, 401, 'This meet has been created already by another user.', null));
-                //}
+                if (existingMeet._meetHost != req.userProfile._id) {
+                    return callback(errorHandler.setUpErrorResponse(req, 401, 'This meet has been created already by another user.', null));
+                }
 
                 result = createReturnResultFromMeet(existingMeet);
 
@@ -271,9 +297,26 @@ exports.createMeet = function (req, res, next) {
 
             return callback();
         },
+        //Adding a new meet hub
+        function (callback){
+            newMeetHub.save(function (e, savedModel) { 
+                if (e) {
+                    errorHandler.setUpErrorResponse(req, 500, 'Error saving new meet hub', e);
+                    return callback(e);
+                }
+
+                if (!savedModel) {
+                    return callback(errorHandler.setUpErrorResponse(req, 500, 'Meet Hub was not created.', null));
+                }
+
+                savedMeetHub = savedModel;
+
+                return callback();
+            });
+        },
         //Adding a new meet
         function (callback){
-
+            newMeet._meetHub = savedMeetHub._id;
             newMeet.save(function (e, savedModel) {
                 if (e) {
                     errorHandler.setUpErrorResponse(req, 500, 'Error saving new meet', e);

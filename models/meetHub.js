@@ -7,7 +7,8 @@ var MeetHubSchema = new mongoose.Schema({
     
 
     description : { type: String, required: true },
-    
+    creationTime : { type: Date, required: true },
+    parentMeetInitialScheduledTime : { type: Date, required: true },//Used for data clean up purposes
     conversationPosts : [
         {
             id : { type: String, required: true },

@@ -9,7 +9,8 @@ require('mongoose-double')(mongoose);
 
 var MeetSchema = new mongoose.Schema({
     _meetHub : {  type: mongoose.Schema.ObjectId, ref: 'MeetHub'  },
-    _meetHost: {  type: mongoose.Schema.ObjectId, ref: 'UserProfile'  },
+    _meetHost: { type: mongoose.Schema.ObjectId, ref: 'UserProfile' },
+    creationTime : { type: Date, required: true },
     title : { type: String, required: true },
     status : { type: String, required: true },
     startTimeUtc : { type: Date, required: true },
@@ -17,7 +18,7 @@ var MeetSchema = new mongoose.Schema({
     pictures : [
         {
             uri: { type: String, required: true },
-            type: { type: String, required: true }
+            metadata: { type: mongoose.Schema.Types.Mixed, required: true }
         }],
     location : {
         lat: { type:mongoose.Schema.Types.Double, required: true },

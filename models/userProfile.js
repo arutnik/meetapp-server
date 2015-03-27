@@ -18,7 +18,7 @@ var UserProfileSchema = new mongoose.Schema({
     pictures : [
         {
             uri: { type: String, required: true },
-            type: { type: String, required: true }
+            metadata: { type: mongoose.Schema.Types.Mixed, required: true }
         }],
     homeLocation : {
         lat: { type: mongoose.Schema.Types.Double, required: true },
