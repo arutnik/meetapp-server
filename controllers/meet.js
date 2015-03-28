@@ -318,6 +318,13 @@ exports.updateMeet = function (req, res, next) {
 
             }
             
+            if ("maxCapacity" in req.body) {
+                if (req.body.maxCapacity != existingMeet.maxCapacity) {
+                    needChangeCapacity = true;
+                    newMaxCapacity = req.body.maxCapacity;
+                }
+            }
+            
             if (needSaveMain) {
                 existingMeet.save(function (err, m) {
                     if (err) {
@@ -348,7 +355,28 @@ exports.updateMeet = function (req, res, next) {
             } else {
                 return callback();
             }
-        }
+        },
+        //change capacity
+        function (callback) {
+            if (needChangeCapacity) {
+                Meet.changeMaxCapacity(existingMeet._id, existingMeet.maxCapacity, newMaxCapacity, function (err, didChange) {
+                    
+                    if (err) {
+                        errorHandler.setUpErrorResponse(req, 500, 'Error updating capacity', err);
+                        return callback(err);
+                    }
+                    
+                    if (!didChange) {
+                        return callback(errorHandler.setUpErrorResponse(req, 410, 'Unable to change capacity due to current attendance.', null));
+                    }
+                    
+                    return callback();
+                     
+                });
+            } else {
+                return callback();
+            }
+        },
     ], function (err) {
         if (err) {
             return next(err);

@@ -42,6 +42,37 @@ MeetSchema.methods.stripDataForReturn = function () {
     
 };
 
+MeetSchema.statics.changeMaxCapacity = function reduceMaxCapacity(meetId, oldMaxCapacity, newMaxCapacity, cb)
+{
+    var meetObjectId = mongoose.Types.ObjectId(meetId);
+
+    if (newMaxCapacity === oldMaxCapacity) {
+        var error = new Error("invalid arguments");
+        return cb(error, false);
+    }
+
+    var difference = newMaxCapacity - oldMaxCapacity;
+    
+    var updateCondition = {};
+    updateCondition._id = meetObjectId;
+    
+    if (difference < 0) {
+        updateCondition.attendeeSpace = { $gte : difference * -1 };
+    }
+
+    this.update(updateCondition
+    , { $inc: { attendeeSpace: difference }, $set: { maxCapacity : newMaxCapacity } }
+    , function (err, model) {
+        
+        var result = false;
+        if (model) {
+            result = true;
+        }
+        
+        return cb(err, result);
+    });
+}
+
 MeetSchema.statics.joinMeetIfRoom = function joinMeet(meetId, userId, cb) {
     
     var meetObjectId = mongoose.Types.ObjectId(meetId);
