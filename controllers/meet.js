@@ -211,6 +211,156 @@ exports.unBanAttendee = function (req, res, next) {
     
 }
 
+// Create endpoint /api/meets/:meet_id for POST
+exports.updateMeet = function (req, res, next) {
+
+    var setOperation = {};
+
+    
+    var needSaveHub = false;
+    var needSaveMain = false;
+    var needChangeCapacity = false;
+    var newMaxCapacity = 0;
+    var result = { saved : true };
+    var existingMeet = null;
+    
+    async.series([
+        function (callback){
+            Meet.findOne({ _id : req.params.meet_id })
+            .populate('_meetHub')
+            .exec(function (err, model) {
+                existingMeet = model;
+                
+                if (err) {
+                    return callback(err);
+                }
+                
+                if (!model) {
+                    return callback(errorHandler.setUpErrorResponse(req, 404, "Meet not found"));
+                }
+                
+                if (!model._meetHost.equals(req.userProfile._id)) {
+                    return callback(errorHandler.setUpErrorResponse(req, 401, "Not authorized to edit this meet"));
+                }
+                
+                return callback();
+            });
+        },
+        //Update data
+        function (callback){
+
+            if ("title" in req.body && req.body.title != existingMeet.title) {
+                needSaveMain = true;
+                existingMeet.title = req.body.title;
+            }
+
+            if ("startTimeUtc" in req.body) {
+                var date = moment(req.body.startTimeUtc).toDate();
+                var oldDate = existingMeet.startTimeUtc;
+                var diff = date - oldDate;
+                if (!(diff === 0)) {
+                    needSaveMain = true;
+                    existingMeet.startTimeUtc = date;
+                }
+            }
+
+            if ("lengthMinutes" in req.body && req.body.lengthMinutes != existingMeet.lengthMinutes) {
+                needSaveMain = true;
+                existingMeet.lengthMinutes = req.body.lengthMinutes;
+            }
+
+            if ("location" in req.body && (req.body.location.lat != existingMeet.location.lat || req.body.location.long != existingMeet.location.long)) {
+                needSaveMain = true;
+                existingMeet.location.lat = req.body.location.lat;
+                existingMeet.location.long = req.body.location.long;
+            }
+
+            if ("attendeeCriteria" in req.body) {
+                
+                var gendersDifference = _(req.body.attendeeCriteria.genders).difference(existingMeet.attendeeCriteria.genders);
+                
+                if (gendersDifference.length > 0) {
+                    needSaveMain = true;
+                    existingMeet.attendeeCriteria.genders = req.body.attendeeCriteria.genders;
+                }
+
+                if (req.body.attendeeCriteria.minAge != existingMeet.attendeeCriteria.minAge 
+                    || req.body.attendeeCriteria.maxAge != existingMeet.attendeeCriteria.maxAge) {
+                    
+                    needSaveMain = true;
+                    existingMeet.attendeeCriteria.minAge = req.body.attendeeCriteria.minAge;
+                    existingMeet.attendeeCriteria.maxAge = req.body.attendeeCriteria.maxAge;
+                }
+            }
+
+            if ("description" in req.body && existingMeet._meetHub.description != req.body.description) {
+                existingMeet._meetHub.description = req.body.description;
+                needSaveHub = true;
+            }
+            
+            if ("pictures" in req.body) {
+
+                var oldPictureUrls = _.pluck(existingMeet.pictures, 'uri');
+
+                var picDifferences = _(oldPictureUrls).difference(req.body.pictures);
+
+                if (picDifferences.length > 0) {
+                    needSaveMain = true;
+                    existingMeet.pictures = [];
+                    _.forEach(req.body.pictures, function (e, i, list) {
+                        var pic = {
+                            uri: e,
+                            metadata: { source: 'host' }
+                        };
+                        existingMeet.pictures.push(pic);
+                    });
+                }
+
+            }
+            
+            if (needSaveMain) {
+                existingMeet.save(function (err, m) {
+                    if (err) {
+                        errorHandler.setUpErrorResponse(req, 500, 'Error updating existing meet', err);
+                        return callback(err);
+                    }
+                    
+                    return callback();
+                });
+            }
+            else {
+                return callback();
+            }
+        },
+        //save hub
+        function (callback){
+            if (needSaveHub) {
+                existingMeet._meetHub.save(function (err, m) {
+                    
+                    if (err) {
+                        errorHandler.setUpErrorResponse(req, 500, 'Error updating existing meet hub', err);
+                        return callback(err);
+                    }
+                    
+                    return callback();
+                     
+                });
+            } else {
+                return callback();
+            }
+        }
+    ], function (err) {
+        if (err) {
+            return next(err);
+        }
+        
+        req.result = result;
+        
+        return next();
+    });
+    
+}
+
 exports.createMeet = function (req, res, next) {
     
     //Todo: many input validations...
@@ -243,6 +393,8 @@ exports.createMeet = function (req, res, next) {
         userCreationId : req.body.userCreationId,
         creationTime: Date.now(),
     });
+    
+    newMeet.attendeeStatus[req.userProfile.id] = 'host';
     
     _.forEach(req.body.pictures, function (e, i, list) {
         var pic = {
@@ -325,7 +477,7 @@ exports.createMeet = function (req, res, next) {
 
                 result = createReturnResultFromMeet(savedModel);
 
-                return callback(breakAsync);
+                return callback();
             });
         }
     ], function (err) {

@@ -20,11 +20,12 @@ var configureRoutes = function (app, router) {
      //   .get(userController.getUsers)
      //   .delete(userController.deleteAll);
     
-    router.route('/meets/create')
+    router.route('/meets')
         .post(authController.isAuthenticated, addUserProfileMiddleware, meetController.createMeet);
     
     router.route('/meets/:meet_id')
-        .get(authController.isAuthenticated, meetController.getMeet);
+        .get(authController.isAuthenticated, meetController.getMeet)
+        .post(authController.isAuthenticated, addUserProfileMiddleware, meetController.updateMeet);
     
     router.route('/meets/:meet_id/join')
         .post(authController.isAuthenticated, addUserProfileMiddleware, meetController.joinMeet);
