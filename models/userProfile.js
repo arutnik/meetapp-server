@@ -1,6 +1,7 @@
 ﻿//Model for a user's profile data.
 
 // Load required packages
+var moment = require('moment');
 var mongoose = require('mongoose');
 require('mongoose-double')(mongoose);
 
@@ -30,13 +31,24 @@ var UserProfileSchema = new mongoose.Schema({
             _meet: { type: mongoose.Schema.Types.ObjectId, ref: 'Meet' },
             userStatus : { type: String, required: true }
         }
-    ]
+    ],
+    searchCriteria : {
+        minHostAge: { type: Number, required: true },
+        maxHostAge: { type: Number, required: true },
+        maxDistanceKm: { type: mongoose.Schema.Types.Double, required: true },
+        matchesInterests: [String],
+        acHostGenders: [String],
+        minHoursToEventStart: { type: Number, required: false },
+        maxHoursToEventStart: { type: Number, required: false }
+    }
 });
 
 UserProfileSchema.post('init', function (callback) {
     var user = this;
     
-    user.age = Date.now - user.dob;
+    var years = moment().diff(user.dob, 'years'); 
+    
+    user.age = years;
 });
 
 //Show what the local user should see when viewing own profile
@@ -53,6 +65,7 @@ UserProfileSchema.methods.stripDataForViewOtherUserLight = function () {
     this.interests = undefined;
     this.bio = undefined;
     this.meets = undefined;
+    this.searchCriteria = undefined;
 };
 
 //Show what the local user should see when viewing other 'detail' profile
@@ -61,6 +74,7 @@ UserProfileSchema.methods.stripDataForViewOtherUserDetailed = function () {
     this.realName = undefined;
     this.dob = undefined;
     this.homeLocation = undefined;
+    this.searchCriteria = undefined;
 };
 
 // Export the Mongoose model

@@ -4,6 +4,7 @@
 var authController = require('./controllers/auth.js');
 var userController = require('./controllers/user.js');
 var meetController = require('./controllers/meet.js');
+var meetFeedController = require('./controllers/meetFeed.js')
 
 var addUserProfileMiddleware = require('./middleware/addUserProfile.js');
 
@@ -38,6 +39,9 @@ var configureRoutes = function (app, router) {
     
     router.route('/meets/:meet_id/unban')
         .post(authController.isAuthenticated, addUserProfileMiddleware, meetController.unBanAttendee);
+    
+    router.route('/meetsfeed')
+        .get(authController.isAuthenticated, addUserProfileMiddleware, meetFeedController.getNextMeetFeedResults);
     
     // Register all our routes with /api
     app.use('/api', router);

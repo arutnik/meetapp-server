@@ -269,10 +269,10 @@ exports.updateMeet = function (req, res, next) {
                 existingMeet.lengthMinutes = req.body.lengthMinutes;
             }
 
-            if ("location" in req.body && (req.body.location.lat != existingMeet.location.lat || req.body.location.long != existingMeet.location.long)) {
+            if ("location" in req.body && (req.body.location.lat != existingMeet.getLocLat() || req.body.location.long != existingMeet.getLocLong())) {
                 needSaveMain = true;
-                existingMeet.location.lat = req.body.location.lat;
-                existingMeet.location.long = req.body.location.long;
+                existingMeet.setLocLat(req.body.location.lat);
+                existingMeet.setLocLong(req.body.location.long);
             }
 
             if ("attendeeCriteria" in req.body) {
@@ -401,10 +401,7 @@ exports.createMeet = function (req, res, next) {
         startTimeUtc: startTimeUtc,
         lengthMinutes: req.body.lengthMinutes,
         pictures: [],
-        location: {
-            lat: req.body.location.lat,
-            long: req.body.location.long,
-        },
+        location: [],
         interests: req.body.interests,
         attendeeSpace : req.body.maxCapacity,
         maxCapacity : req.body.maxCapacity,
@@ -418,9 +415,15 @@ exports.createMeet = function (req, res, next) {
         attendeeStatus : {},
         status: 'active',
         _meetHost: req.userProfile._id,
+        hostAge: req.userProfile.age,
+        hostGender: req.userProfile.gender,
         userCreationId : req.body.userCreationId,
         creationTime: Date.now(),
     });
+    
+    //todo find better place for this
+    newMeet.location.push(req.body.location.long);
+    newMeet.location.push(req.body.location.lat);
     
     newMeet.attendeeStatus[req.userProfile.id] = 'host';
     

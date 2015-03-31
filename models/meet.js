@@ -1,7 +1,6 @@
 ﻿//Model for a meet's basic data for use in search results and linking
 //Ensure dependent models loaded
-//var UserProfile = require('./userProfile.js');
-//var MeetHub = require('./meetHub.js');
+var meetFeed = require('./meetFeed.js');
 
 // Load required packages
 var mongoose = require('mongoose');
@@ -10,6 +9,8 @@ require('mongoose-double')(mongoose);
 var MeetSchema = new mongoose.Schema({
     _meetHub : {  type: mongoose.Schema.ObjectId, ref: 'MeetHub'  },
     _meetHost: { type: mongoose.Schema.ObjectId, ref: 'UserProfile' },
+    hostAge : { type: Number, required: true },//years
+    hostGender : { type: String, required: true },
     creationTime : { type: Date, required: true },
     title : { type: String, required: true },
     status : { type: String, required: true },
@@ -21,8 +22,8 @@ var MeetSchema = new mongoose.Schema({
             metadata: { type: mongoose.Schema.Types.Mixed, required: true }
         }],
     location : {
-        lat: { type:mongoose.Schema.Types.Double, required: true },
-        long: { type: mongoose.Schema.Types.Double, required: true }
+        type: [Number],  // [<longitude>, <latitude>]
+        index: '2d'      // create the geospatial index
     },
     interests : [String],
     attendees : [{ type: mongoose.Schema.Types.ObjectId, ref: 'UserProfile' }],//Just user user ids
@@ -38,9 +39,7 @@ var MeetSchema = new mongoose.Schema({
     userCreationId : { type: String, required: true }
 });
 
-MeetSchema.methods.stripDataForReturn = function () {
-    
-};
+MeetSchema.statics.getNextMeetFeedResults = meetFeed.getNextMeetFeedResults;
 
 MeetSchema.statics.changeMaxCapacity = function reduceMaxCapacity(meetId, oldMaxCapacity, newMaxCapacity, cb)
 {
@@ -71,6 +70,22 @@ MeetSchema.statics.changeMaxCapacity = function reduceMaxCapacity(meetId, oldMax
         
         return cb(err, result);
     });
+}
+
+MeetSchema.methods.getLocLat = function (){
+    return this.location[1];
+}
+
+MeetSchema.methods.setLocLat = function(lat) {
+    this.location[1] = lat;
+}
+
+MeetSchema.methods.getLocLong = function (){
+    return this.location[0];
+}
+
+MeetSchema.methods.setLocLong = function (long){
+    this.location[0] = long;
 }
 
 MeetSchema.statics.joinMeetIfRoom = function joinMeet(meetId, userId, cb) {
