@@ -25,22 +25,7 @@ exports.getMeet = function (req, res, next) {
         
         //Post process user data
         
-        if (model._meetHost instanceof UserProfile) {
-            //Don't care if viewing your own, no need to send your own full profile
-            model._meetHost.stripDataForViewOtherUserLight();
-        }
-        
-        _.forEach(model.attendees, function (e, i, list) {
-            if (e instanceof UserProfile) {
-                e.stripDataForViewOtherUserLight();
-            }
-        });
-        
-        _.forEach(model.bannedAttendees, function (e, i, list) {
-            if (e instanceof UserProfile) {
-                e.stripDataForViewOtherUserLight();
-            }
-        });
+        model.stripUserDataForLightView();
 
         req.result = model;
 

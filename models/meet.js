@@ -1,6 +1,7 @@
 ﻿//Model for a meet's basic data for use in search results and linking
 //Ensure dependent models loaded
 var meetFeed = require('./meetFeed.js');
+var _ = require('underscore');
 
 // Load required packages
 var mongoose = require('mongoose');
@@ -183,6 +184,27 @@ MeetSchema.statics.unBanAttendee = function banAttendee(meetId, bannedUserId, cb
         return cb(err, result);
 
     });
+};
+
+MeetSchema.methods.stripUserDataForLightView = function () {
+
+    if (this._meetHost && typeof this._meetHost.stripDataForViewOtherUserLight == 'function') {
+        //Don't care if viewing your own, no need to send your own full profile
+        this._meetHost.stripDataForViewOtherUserLight();
+    }
+    
+    _.forEach(this.attendees, function (e, i, list) {
+        if (e && typeof e.stripDataForViewOtherUserLight == 'function') {
+            e.stripDataForViewOtherUserLight();
+        }
+    });
+    
+    _.forEach(this.bannedAttendees, function (e, i, list) {
+        if (e && typeof e.stripDataForViewOtherUserLight == 'function') {
+            e.stripDataForViewOtherUserLight();
+        }
+    });
+
 };
 
 // Export the Mongoose model
