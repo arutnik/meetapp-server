@@ -55,7 +55,7 @@ module.exports.getNextMeetFeedResults = function (userProfile, userRejectedMeets
         var now = new Date(Date.now());
         if (usc.minHoursToEventStart != null) {
             
-            var date = moment();
+            var date = moment.utc();
             date.add(usc.minHoursToEventStart, 'h');
 
             queryCondition.startTimeUtc.$gte = date.toDate();
@@ -63,7 +63,7 @@ module.exports.getNextMeetFeedResults = function (userProfile, userRejectedMeets
 
         if (usc.maxHoursToEventStart != null) {
             
-            var date = moment(); date.to
+            var date = moment.utc();
             date.add(usc.maxHoursToEventStart, 'h');
             
             queryCondition.startTimeUtc.$lte = date.toDate();

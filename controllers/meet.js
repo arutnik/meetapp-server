@@ -255,7 +255,7 @@ exports.updateMeet = function (req, res, next) {
             }
 
             if ("startTimeUtc" in req.body) {
-                var date = moment(req.body.startTimeUtc).toDate();
+                var date = moment.utc(req.body.startTimeUtc).toDate();
                 var oldDate = existingMeet.startTimeUtc;
                 var diff = date - oldDate;
                 if (!(diff === 0)) {
@@ -393,7 +393,7 @@ exports.createMeet = function (req, res, next) {
     
     //Todo: many input validations...
     
-    var startTimeUtc = moment(req.body.startTimeUtc);
+    var startTimeUtc = moment.utc(req.body.startTimeUtc);
     
 
     var newMeet = new Meet({
