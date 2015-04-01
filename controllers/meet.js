@@ -401,7 +401,6 @@ exports.createMeet = function (req, res, next) {
         startTimeUtc: startTimeUtc,
         lengthMinutes: req.body.lengthMinutes,
         pictures: [],
-        location: [],
         interests: req.body.interests,
         attendeeSpace : req.body.maxCapacity,
         maxCapacity : req.body.maxCapacity,
@@ -420,10 +419,11 @@ exports.createMeet = function (req, res, next) {
         userCreationId : req.body.userCreationId,
         creationTime: Date.now(),
     });
-    
+
     //todo find better place for this
-    newMeet.location.push(req.body.location.long);
-    newMeet.location.push(req.body.location.lat);
+    newMeet.location = [
+        req.body.location.long,
+        req.body.location.lat];
     
     newMeet.attendeeStatus[req.userProfile.id] = 'host';
     

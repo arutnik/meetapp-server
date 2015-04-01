@@ -1,4 +1,4 @@
-﻿
+﻿var moment = require('moment');
 //A set of extension methods on the meet schema that allow getting results from the 'meet feed'
 
 var getLocationQueryObject = function (lat, long, distanceKm)
@@ -35,7 +35,7 @@ module.exports.getNextMeetFeedResults = function (userProfile, userRejectedMeets
     
     //Query must match searcher's criteria
     
-    queryCondition.location = getLocationQueryObject(userProfile.homeLocation.lat, userProfile.homeLocation.long, usc.maxDistanceKm);
+    queryCondition.location = getLocationQueryObject(userProfile.homeLocation.lat.value, userProfile.homeLocation.long.value, usc.maxDistanceKm);
     
     queryCondition.hostAge = {
         $gte: usc.minHostAge,
@@ -55,8 +55,8 @@ module.exports.getNextMeetFeedResults = function (userProfile, userRejectedMeets
         var now = new Date(Date.now());
         if (usc.minHoursToEventStart != null) {
             
-            var date = moment();date.to
-            moment.add(usc.minHoursToEventStart, 'h');
+            var date = moment();
+            date.add(usc.minHoursToEventStart, 'h');
 
             queryCondition.startTimeUtc.$gte = date.toDate();
         }
@@ -64,7 +64,7 @@ module.exports.getNextMeetFeedResults = function (userProfile, userRejectedMeets
         if (usc.maxHoursToEventStart != null) {
             
             var date = moment(); date.to
-            moment.add(usc.maxHoursToEventStart, 'h');
+            date.add(usc.maxHoursToEventStart, 'h');
             
             queryCondition.startTimeUtc.$lte = date.toDate();
         }
@@ -75,21 +75,21 @@ module.exports.getNextMeetFeedResults = function (userProfile, userRejectedMeets
     var userGenders = [];
     userGenders.push(userProfile.gender)
     
-    queryCondition.attendeeCriteria = {};
-    queryCondition.attendeeCriteria.genders = {
+    //queryCondition.attendeeCriteria = {};
+    queryCondition['attendeeCriteria.genders'] = {
         $in : userGenders
     };
-    queryCondition.attendeeCriteria.minAge = {
+    queryCondition['attendeeCriteria.minAge'] = {
         $lte: userProfile.age
     };
-    queryCondition.attendeeCriteria.maxAge = {
+    queryCondition['attendeeCriteria.maxAge'] = {
         $gte: userProfile.age
     };
     
     //TODO filter out what you've already rejected
     
     db.find(queryCondition)
-    .populate(_meetHost)
+    .populate('_meetHost')
     .limit(queryLimit)
     .exec(function (err, models) {
         if (err)
