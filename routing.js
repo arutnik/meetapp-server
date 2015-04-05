@@ -15,10 +15,13 @@ var configureRoutes = function (app, router) {
         .post(userController.registerWithFb);
     router.route('/user/registerdebug')
         .post(userController.registerDebug);
+    router.route('/user/:user_id')
+        .get(authController.isAuthenticated, userController.getUser)
+        .post(authController.isAuthenticated, addUserProfileMiddleware, userController.updateUserProfile);
    
     
-    //router.route('/user')
-     //   .get(userController.getUsers)
+    router.route('/userdebug')
+       .get(userController.getUsers);
      //   .delete(userController.deleteAll);
     
     router.route('/meets')

@@ -289,7 +289,7 @@ exports.updateMeet = function (req, res, next) {
 
                 var picDifferences = _(oldPictureUrls).difference(req.body.pictures);
 
-                if (picDifferences.length > 0) {
+                if (picDifferences.length > 0 || existingMeet.pictures.length < req.body.pictures.length) {
                     needSaveMain = true;
                     existingMeet.pictures = [];
                     _.forEach(req.body.pictures, function (e, i, list) {
