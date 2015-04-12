@@ -14,9 +14,9 @@ exports.getNextMeetFeedResults = function (req, res, next) {
         if (err)
             return next(err);
         
-        _.forEach(model, function (e, i, list){
+        _.forEach(model, function (e, i, list) {
             e.stripUserDataForLightView();
-        })
+        });
 
         req.result = { data: model };
 

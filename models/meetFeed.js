@@ -1,4 +1,5 @@
 ﻿var moment = require('moment');
+var _ = require('underscore');
 //A set of extension methods on the meet schema that allow getting results from the 'meet feed'
 
 var getLocationQueryObject = function (lat, long, distanceKm)
@@ -86,7 +87,16 @@ module.exports.getNextMeetFeedResults = function (userProfile, userRejectedMeets
         $gte: userProfile.age
     };
     
-    //TODO filter out what you've already rejected
+    //Build a blacklist of meet id's.
+    
+    var meetIdBlackList = _.pluck(userRejectedMeets.rejectedMeets, '_meet');
+    
+    //Look through the loaded meet list.
+    
+    //Remove ones your hosting
+    meetIdBlackList = meetIdBlackList.concat(userProfile.meets);
+    //joined
+    //banned
     
     db.find(queryCondition)
     .populate('_meetHost')

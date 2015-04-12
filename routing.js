@@ -17,7 +17,7 @@ var configureRoutes = function (app, router) {
         .post(userController.registerDebug);
     router.route('/user/:user_id')
         .get(authController.isAuthenticated, userController.getUser)
-        .post(authController.isAuthenticated, addUserProfileMiddleware, userController.updateUserProfile);
+        .post(authController.isAuthenticated, addUserProfileMiddleware.withoutMeets, userController.updateUserProfile);
    
     
     router.route('/userdebug')
@@ -25,26 +25,26 @@ var configureRoutes = function (app, router) {
      //   .delete(userController.deleteAll);
     
     router.route('/meets')
-        .post(authController.isAuthenticated, addUserProfileMiddleware, meetController.createMeet);
+        .post(authController.isAuthenticated, addUserProfileMiddleware.withoutMeets, meetController.createMeet);
     
     router.route('/meets/:meet_id')
         .get(authController.isAuthenticated, meetController.getMeet)
-        .post(authController.isAuthenticated, addUserProfileMiddleware, meetController.updateMeet);
+        .post(authController.isAuthenticated, addUserProfileMiddleware.withoutMeets, meetController.updateMeet);
     
     router.route('/meets/:meet_id/join')
-        .post(authController.isAuthenticated, addUserProfileMiddleware, meetController.joinMeet);
+        .post(authController.isAuthenticated, addUserProfileMiddleware.withoutMeets, meetController.joinMeet);
     
     router.route('/meets/:meet_id/leave')
-        .post(authController.isAuthenticated, addUserProfileMiddleware, meetController.leaveMeet);
+        .post(authController.isAuthenticated, addUserProfileMiddleware.withoutMeets, meetController.leaveMeet);
     
     router.route('/meets/:meet_id/ban')
-        .post(authController.isAuthenticated, addUserProfileMiddleware, meetController.banAttendee);
+        .post(authController.isAuthenticated, addUserProfileMiddleware.withoutMeets, meetController.banAttendee);
     
     router.route('/meets/:meet_id/unban')
-        .post(authController.isAuthenticated, addUserProfileMiddleware, meetController.unBanAttendee);
+        .post(authController.isAuthenticated, addUserProfileMiddleware.withoutMeets, meetController.unBanAttendee);
     
     router.route('/meetsfeed')
-        .get(authController.isAuthenticated, addUserProfileMiddleware, meetFeedController.getNextMeetFeedResults);
+        .get(authController.isAuthenticated, addUserProfileMiddleware.withMeets, meetFeedController.getNextMeetFeedResults);
     
     // Register all our routes with /api
     app.use('/api', router);

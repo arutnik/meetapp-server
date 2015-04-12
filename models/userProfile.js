@@ -27,10 +27,7 @@ var UserProfileSchema = new mongoose.Schema({
     },
     interests : [String],
     meets : [
-        {
-            _meet: { type: mongoose.Schema.Types.ObjectId, ref: 'Meet' },
-            userStatus : { type: String, required: true }
-        }
+            { type: mongoose.Schema.Types.ObjectId, ref: 'Meet' }
     ],
     searchCriteria : {
         minHostAge: { type: Number, required: true },
@@ -50,6 +47,20 @@ UserProfileSchema.post('init', function (callback) {
     
     user.age = years;
 });
+
+UserProfileSchema.statics.addToUsersMeets = function (userId, meetId, cb){
+    
+    var userObjectId = mongoose.Types.ObjectId(userId);
+    var meetObjectId = mongoose.Types.ObjectId(meetId);
+
+    this.update({ _id : userObjectId }, { $push: { meets : meetObjectId } }, function (err, model) { 
+
+        if (err)
+            return cb(err);
+
+        return cb(null);
+    });
+}
 
 //Show what the local user should see when viewing own profile
 UserProfileSchema.methods.stripDataForViewCurrentUser = function () {

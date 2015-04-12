@@ -13,7 +13,8 @@ var formatResponse = function (req, res, next) {
         finalResponse.result = req.result;
         finalResponse.message = null;
     }
-    else if (req.responseCode) {
+    
+    if (req.responseCode) {
         
         finalResponse.responseCode = Math.abs(parseInt(req.statusCode));
         

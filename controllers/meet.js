@@ -46,10 +46,23 @@ exports.joinMeet = function (req, res, next) {
         if (!didJoin) {
             return next(errorHandler.setUpErrorResponse(req, 410, "Was not allowed to join the meet", null));
         }
+        
+        //Have to update user - wish we had a transaction here
+        
+        UserProfile.addToUsersMeets(req.userProfile._id, req.params.meet_id, function (err2) {
+            
+            if (err2) {
+                errorHandler.setUpErrorResponse(req, 206, "Joined meet but was unable to add meet to user. Follow client recovery procedure 1.1.7b.", err2);
+                return next(err2);
+            }
 
-        req.result = { joined: true };
+            req.result = { joined: true };
+            
+            return next();
 
-        return next();
+        });
+
+        
     });
 
 }
@@ -495,6 +508,19 @@ exports.createMeet = function (req, res, next) {
 
                 return callback();
             });
+        },
+        //Add to user
+        function (callback) {
+            UserProfile.addToUsersMeets(req.userProfile._id, result.id, function (err2) {
+                
+                if (err2) {
+                    errorHandler.setUpErrorResponse(req, 206, "Created meet but was unable to add meet to user. Follow client recovery procedure 1.1.7a.", err2);
+                    return next(err2);
+                }
+                
+                return next();
+
+            })  
         }
     ], function (err) {
         if (err && err != breakAsync) {
