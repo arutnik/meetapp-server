@@ -1,4 +1,5 @@
 ﻿var moment = require('moment');
+var Meet = require('./meet.js');
 var _ = require('underscore');
 //A set of extension methods on the meet schema that allow getting results from the 'meet feed'
 
@@ -94,9 +95,40 @@ module.exports.getNextMeetFeedResults = function (userProfile, userRejectedMeets
     //Look through the loaded meet list.
     
     //Remove ones your hosting
-    meetIdBlackList = meetIdBlackList.concat(userProfile.meets);
-    //joined
-    //banned
+    
+    _.forEach(userProfile.meets, function (e, i, lst) {
+
+        if (!("_meetHost" in e))
+            return;//continue
+
+        //reject if you're the host
+        var userMeet = e;
+
+        if (userProfile._id.equals(userMeet._meetHost)) {
+            meetIdBlackList.push(userMeet._id);
+            return;
+        }
+
+        if (!("attendeeStatus" in userMeet) || !(userMeet.attendeeStatus))
+            return;
+
+        if (!(userProfile.id in userMeet.attendeeStatus))
+            return;
+
+        var userStatusInMeet = userMeet.attendeeStatus[userProfile.id];
+
+        if (!userStatusInMeet)
+            return;
+
+        if (userStatusInMeet === 'att' || userStatusInMeet === 'banned') {
+            meetIdBlackList.push(userMeet._id);
+            return;
+        }
+    });
+
+    if (meetIdBlackList.length > 0) {
+        queryCondition._id = { $nin: meetIdBlackList };
+    }
     
     db.find(queryCondition)
     .populate('_meetHost')

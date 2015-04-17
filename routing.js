@@ -7,6 +7,7 @@ var meetController = require('./controllers/meet.js');
 var meetFeedController = require('./controllers/meetFeed.js')
 
 var addUserProfileMiddleware = require('./middleware/addUserProfile.js');
+var addRejectedMeetsMiddleware = require('./middleware/addUserRejectedMeets.js');
 
 var configureRoutes = function (app, router) {
 
@@ -44,7 +45,7 @@ var configureRoutes = function (app, router) {
         .post(authController.isAuthenticated, addUserProfileMiddleware.withoutMeets, meetController.unBanAttendee);
     
     router.route('/meetsfeed')
-        .get(authController.isAuthenticated, addUserProfileMiddleware.withMeets, meetFeedController.getNextMeetFeedResults);
+        .get(authController.isAuthenticated, addUserProfileMiddleware.withMeets, addRejectedMeetsMiddleware,  meetFeedController.getNextMeetFeedResults);
     
     // Register all our routes with /api
     app.use('/api', router);

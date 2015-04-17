@@ -16,6 +16,28 @@ var UserRejectedMeetsSchema = new mongoose.Schema({
     ]
 });
 
+UserRejectedMeetsSchema.statics.getOrCreateForUser = function (userId, cb) {
+    
+    var userObjectId = mongoose.Types.ObjectId(userId);
+
+    this.collection.findAndModify(
+        { _userProfile : userObjectId },
+        [],
+        {
+            $setOnInsert : { _userProfile : userObjectId, rejectedMeets : new Array() }
+        },
+        {
+            new: true,
+            upsert: true,
+        }
+        , function (err, model) {
+
+            if (err) return cb(err, null);
+        
+            return cb(null, model);
+        });
+}
+
 
 // Export the Mongoose model
 module.exports = mongoose.model('UserRejectedMeets', UserRejectedMeetsSchema);

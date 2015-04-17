@@ -9,7 +9,7 @@ var moment = require('moment');
 // Create endpoint /api/meetsfeed/ for GET
 exports.getNextMeetFeedResults = function (req, res, next) {
     
-    Meet.getNextMeetFeedResults(req.userProfile, null, 20, function (err, model) {
+    Meet.getNextMeetFeedResults(req.userProfile, req.rejectedMeets, 20, function (err, model) {
 
         if (err)
             return next(err);

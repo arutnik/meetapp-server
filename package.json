@@ -15,7 +15,7 @@
     "express": "^4.12.2",
     "facebook-sdk": "^0.3.2",
     "moment": "^2.9.0",
-    "mongoose": "^3.8.24",
+    "mongoose": "3.8",
     "mongoose-double": "0.0.1",
     "node-uuid": "^1.4.3",
     "passport": "^0.2.1",
