@@ -3,7 +3,7 @@ var errorHandler = require('../errorHandler');
 
 var addUserRejectedMeets = function (req, res, next) {
     
-    UserRejectedMeets.getOrCreateForUser(req.user._id, function (err, rejectedMeets) {
+    UserRejectedMeets.getOrCreateForUser(req.userProfile._id, function (err, rejectedMeets) {
 
         if (err) {
             errorHandler.setUpErrorResponse(req, 500, 'Error finding user rejected meets', err);

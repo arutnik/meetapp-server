@@ -3,6 +3,7 @@
 
 // Load required packages
 var mongoose = require('mongoose');
+var _ = require('underscore');
 
 // Define our user schema
 var UserRejectedMeetsSchema = new mongoose.Schema({
@@ -36,6 +37,42 @@ UserRejectedMeetsSchema.statics.getOrCreateForUser = function (userId, cb) {
         
             return cb(null, model);
         });
+}
+
+UserRejectedMeetsSchema.statics.rejectMeets = function (userId, meetIds, cb) {
+
+    var userObjectId = mongoose.Types.ObjectId(userId);
+
+    var toPush = _.map(meetIds, function (m) { return { _meet : mongoose.Types.ObjectId(m.meetId) , checkForCleanUpOn : m.checkForCleanUpOn }; });
+
+    this.update({ _userProfile : { $eq : userObjectId } }
+    , { $pushAll: { rejectedMeets: toPush } }
+    , function (err, model) {
+        
+        var result = false;
+        if (model) {
+            result = true;
+        }
+        
+        return cb(err, result);
+    });
+}
+
+UserRejectedMeetsSchema.statics.removeAll = function (userId, cb) {
+    
+    var userObjectId = mongoose.Types.ObjectId(userId);
+    
+    this.update({ _userProfile : userObjectId}
+    , { $set: { rejectedMeets: [] } }
+    , function (err, model) {
+        
+        var result = false;
+        if (model) {
+            result = true;
+        }
+        
+        return cb(err, result);
+    });
 }
 
 

@@ -45,7 +45,13 @@ var configureRoutes = function (app, router) {
         .post(authController.isAuthenticated, addUserProfileMiddleware.withoutMeets, meetController.unBanAttendee);
     
     router.route('/meetsfeed')
-        .get(authController.isAuthenticated, addUserProfileMiddleware.withMeets, addRejectedMeetsMiddleware,  meetFeedController.getNextMeetFeedResults);
+        .get(authController.isAuthenticated, addUserProfileMiddleware.withMeets, addRejectedMeetsMiddleware, meetFeedController.getNextMeetFeedResults);
+    
+    router.route('/meetsfeed/reject')
+        .post(authController.isAuthenticated, addUserProfileMiddleware.withoutMeets, addRejectedMeetsMiddleware, meetFeedController.rejectMeets);
+    
+    router.route('/meetsfeed/restart')
+        .post(authController.isAuthenticated, addUserProfileMiddleware.withoutMeets, addRejectedMeetsMiddleware, meetFeedController.removeAllRejects);
     
     // Register all our routes with /api
     app.use('/api', router);
