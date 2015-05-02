@@ -56,7 +56,7 @@ exports.registerDebug = function (req, res, next) {
 
 exports.registerWithFb = function (req, res, next) {
     
-    if (!("fbId" in req.body) || !("fbAccessToken" in req.body)) {
+    if (!("fbId" in req.body) || !("fbAccessToken" in req.body) || !("fbUser" in req.body)) {
         return next(errorHandler.setUpErrorResponse(req, 400, "Missing data in request body", null));
     }
 
@@ -73,6 +73,8 @@ exports.registerWithFb = function (req, res, next) {
     
     var graphResponseBody = '';
     var existingUser = {};
+    var existingUserProfile = null;
+    var breakAsync = { break: true };
     
     async.series([
         //Start http request
@@ -143,16 +145,67 @@ exports.registerWithFb = function (req, res, next) {
                     return callback(err);
                 }
                 
-                var newUser = { userId: user.pm }
                 
-                req.result.newUser = returnedUserView;
+                
+                req.result = returnedUserView;
                 return callback();
             });
+        },
+        //Get User Profile
+        function (callback)
+        {
+            UserProfile.getForUser(existingUser._id, function (err, model) {
+                if (err) {
+                    errorHandler.setUpErrorResponse(req, 500, 'Error getting user profile.', err);
+                    return callback(err);
+                }
+
+                if (model) {
+                    req.result.userProfileId = model.id;
+                    return callback(breakAsync);
+                }
+
+                return callback();
+            });
+        },
+        //Create new user Profile
+        function (callback)
+        {
+            var newUserProfile = new UserProfile({
+                _user: existingUser._id,
+                realName : { firstName: req.body.fbUser.firstName, lastName: req.body.fbUser.lastName },
+                dob: new Date(1000,1,1),
+                displayName: req.body.fbUser.firstName + ' ' + req.body.fbUser.lastName,
+                bio: ' ',
+                gender: req.body.fbUser.gender,
+                pictures: [],
+                homeLocation: { lat: 0, long: 0 },
+                interests: [],
+                meets : [],
+                searchCriteria : {
+                    minHostAge: 0,
+                    maxHostAge: 0,
+                    maxDistanceKm: 0,
+                }
+            });
+
+            newUserProfile.save(function (err, nu) {
+
+                if (err) {
+                    errorHandler.setUpErrorResponse(req, 500, 'Error creating user profile.', err);
+                    return callback(err);
+                }
+                
+                if (nu) {
+                    req.result.userProfileId = nu.id;
+                    return callback(breakAsync);
+                }
+
+            });
         }
-    
     ], function (err) {
 
-        if (err) return next(err);
+        if (err && err != breakAsync) return next(err);
 
         return next();
     });

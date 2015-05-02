@@ -40,6 +40,8 @@ var UserProfileSchema = new mongoose.Schema({
     }
 });
 
+
+
 UserProfileSchema.post('init', function (callback) {
     var user = this;
     
@@ -47,6 +49,22 @@ UserProfileSchema.post('init', function (callback) {
     
     user.age = years;
 });
+
+UserProfileSchema.statics.getForUser = function (userLoginId, cb) {
+    
+    var userObjectId = mongoose.Types.ObjectId(userLoginId);
+    
+    this.findOne(
+        { _user : userObjectId },
+        
+        function (err, model) {
+            
+            if (err) return cb(err, null);
+            
+            return cb(null, model);
+        });
+};
+
 
 UserProfileSchema.statics.addToUsersMeets = function (userId, meetId, cb){
     
