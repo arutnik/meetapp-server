@@ -213,6 +213,8 @@ exports.registerWithFb = function (req, res, next) {
 
 // Create endpoint /api/users/:user_id for GET
 exports.getUser = function (req, res, next) {
+    
+
 
     UserProfile.findById(req.params.user_id)
     .populate('meets')
@@ -226,9 +228,11 @@ exports.getUser = function (req, res, next) {
         if (!model) {
             return next(errorHandler.setUpErrorResponse(req, 404, 'Could not find user.', null));
         }
-
-        model.stripDataForViewOtherUserDetailed();
-
+        
+        if (!(model._user.equals(req.user._id))) {
+            model.stripDataForViewOtherUserDetailed();
+        }
+        
         req.result = model;
 
         return next();
