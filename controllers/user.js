@@ -145,7 +145,7 @@ exports.registerWithFb = function (req, res, next) {
                     return callback(err);
                 }
                 
-                
+                existingUser = user;
                 
                 req.result = returnedUserView;
                 return callback();
@@ -188,6 +188,12 @@ exports.registerWithFb = function (req, res, next) {
                     maxDistanceKm: 0,
                 }
             });
+            
+            var pic = {
+                uri: 'https://graph.facebook.com/' + req.body.fbId + '/picture?type=large',
+                metadata: { source: 'facebook', type: 'profile' }
+            };
+            newUserProfile.pictures.push(pic);
 
             newUserProfile.save(function (err, nu) {
 
